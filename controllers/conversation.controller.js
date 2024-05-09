@@ -120,10 +120,14 @@ export const getConversation = async (req, res) => {
 export const createConversation = async (req, res) => {
   try {
     const character = await Character.findById(req.body.character);
+    if (!character) {
+      return res.status(404).json({ error: "Character not found" });
+    }
     const conversation = await Conversation.create(req.body);
     if (!conversation) {
       return res.status(404).json({ error: "Can not create conversation" });
     }
+
     // update history
     const initialMessages = [
       {
@@ -179,6 +183,26 @@ export const getConversationsByUser = async (req, res) => {
         conversations,
       },
     });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+
+export const deleteConversation = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({ message: "Missing conversation id" });
+    }
+
+    const conversation = await Conversation.findByIdAndDelete(id);
+
+    if (!conversation) {
+      return res.status(404).json({ message: "Not found conversation" });
+    }
+    return res.status(200).json({ message: "Conversation deleted" });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
