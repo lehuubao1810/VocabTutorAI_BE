@@ -13,9 +13,7 @@ export const createCharacter = async (req, res) => {
 
     res.status(201).json({
       status: "success",
-      data: {
-        character: newCharacter,
-      },
+      character: newCharacter,
     });
   } catch (error) {
     res.status(409).json({ message: error.message });
@@ -28,12 +26,31 @@ export const getCharacters = async (req, res) => {
 
     res.status(200).json({
       status: "success",
-      data: {
-        characters,
-      },
+      characters,
     });
   } catch (error) {
     res.status(404).json({ message: error.message });
+  }
+};
+
+export const getCharacterById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({ message: "Missing character id" });
+    }
+
+    const character = await Character.findById(id);
+    if (!character) {
+      return res.status(404).json({ message: "Not found character" });
+    }
+    return res.status(200).json({
+      status: "success",
+      character,
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
   }
 };
 
@@ -45,7 +62,7 @@ export const deleteCharacter = async (req, res) => {
       return res.status(400).json({ message: "Missing character id" });
     }
 
-    const character = await Character.findByIdAndRemove(id);
+    const character = await Character.findByIdAndDelete(id);
 
     if (!character) {
       return res.status(404).json({ message: "Not found character" });

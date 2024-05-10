@@ -7,6 +7,10 @@ const characterSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  image: {
+    type: String,
+    required: false,
+  },
   personality: {
     type: String,
     required: true,

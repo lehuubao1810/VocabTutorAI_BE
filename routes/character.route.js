@@ -1,5 +1,5 @@
 import express from 'express';
-import { createCharacter, getCharacters } from '../controllers/character.controller.js';
+import { createCharacter, deleteCharacter, getCharacters } from '../controllers/character.controller.js';
 
 
 const routerCharacter = express.Router();
@@ -7,5 +7,7 @@ const routerCharacter = express.Router();
 routerCharacter.post('/createCharacter', createCharacter);
 
 routerCharacter.get('/getCharacters', getCharacters);
+
+routerCharacter.delete('/deleteCharacter/:id', deleteCharacter);
 
 export default routerCharacter;

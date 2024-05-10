@@ -50,20 +50,9 @@ export const createMessage = async (req, res) => {
     });
 
     // const result = await chat.sendMessage(message, { role: "user" });
-    const result = await chat.sendMessageStream(message, { role: "user" });
-    // const response = await result.response;
-    // const text = response.text();
-    res.setHeader("Content-Type", "text/plain");
-    res.setHeader("Transfer-Encoding", "chunked");
-    res.status(200);
-
-    let text = "";
-    for await (const chunk of result.stream) {
-      const chunkText = chunk.text();
-      console.log(chunkText);
-      text += chunkText;
-      res.write(chunkText);
-    }
+    const result = await chat.sendMessage(message, { role: "user" });
+    const response = result.response;
+    const text = response.text();
 
     const updatedConversation = await Conversation.findByIdAndUpdate(
       req.params.id,
@@ -85,10 +74,11 @@ export const createMessage = async (req, res) => {
       },
       { new: true }
     );
-    // return res.status(200).json({
-    //   response: text,
-    // });
-    res.end();
+    
+    return res.status(200).json({
+      response: text,
+    });
+    // res.end();
   } catch (error) {
     console.log("Error catch in sendMessage: ", error);
     // return res.status(500).json({ error: error.message });
@@ -104,13 +94,11 @@ export const getConversation = async (req, res) => {
     const id = new Types.ObjectId(req.params.id);
     const conversation = await Conversation.findById(id).populate("character");
 
-    conversation.history.splice(0, 3); 
+    conversation.history.splice(0, 3);
 
     return res.status(200).json({
       status: "success",
-      data: {
-        conversation,
-      },
+      conversation,
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -158,13 +146,13 @@ export const createConversation = async (req, res) => {
         },
       },
       { new: true }
-    );
+    ).populate("character");
+
+    updatedConversation.history.splice(0, 3);
 
     return res.status(201).json({
       status: "success",
-      data: {
-        conversation: updatedConversation,
-      },
+      conversation: updatedConversation,
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -179,15 +167,12 @@ export const getConversationsByUser = async (req, res) => {
     // find conversation by characterId
     return res.status(200).json({
       status: "success",
-      data: {
-        conversations,
-      },
+      conversations,
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
 };
-
 
 export const deleteConversation = async (req, res) => {
   try {
