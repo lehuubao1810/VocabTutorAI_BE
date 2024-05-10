@@ -8,7 +8,7 @@ routerChat.post('/sendMessage/:id', createMessage);
 
 routerChat.post('/createConversation', createConversation);
 
-routerChat.get('/getConversationsByUser', getConversationsByUser);
+routerChat.get('/getConversationsByUser/:uid', getConversationsByUser);
 
 routerChat.get('/getConversation/:id', getConversation);
 
