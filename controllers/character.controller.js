@@ -94,10 +94,13 @@ if (!fs.existsSync(dir)){
     fs.mkdirSync(dir);
 }
 
+export const uploadImageMiddleware = upload.single('image');
+
 export const editCharacter = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, personality, firstGreet, information } = req.body;
+    console.log(id);
+    const { name, personality } = req.body;
     let imagePath;
 
     if (!id) {
@@ -108,18 +111,18 @@ export const editCharacter = async (req, res) => {
       imagePath = req.file.path;
     }
 
+    const normalizedImagePath = imagePath.replace(/\\/g, '/');
+
     const updateData = {
-      name,
-      personality,
-      firstGreet,
-      information,
-      ...(imagePath && { image: imagePath }), // Thêm trường image nếu có tệp hình ảnh
+      ...(name && { name }),
+      ...(personality && { personality }),
+      ...(imagePath && { image: normalizedImagePath }),
     };
 
     const character = await Character.findByIdAndUpdate(id, updateData, { new: true });
 
     if (!character) {
-      return res.status(404).json({ message: "Not found character" });
+      return res.status(404).json({ message: "Character not found" });
     }
 
     return res.status(200).json({
@@ -130,6 +133,3 @@ export const editCharacter = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
-
-// Sử dụng middleware upload để xử lý yêu cầu có tệp hình ảnh
-export const uploadImageMiddleware = upload.single('image');  
