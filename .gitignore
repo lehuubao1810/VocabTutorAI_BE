@@ -31,4 +31,5 @@ firebase.json
 
 #
 .history
+.serviceAccountKey.json
 

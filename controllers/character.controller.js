@@ -72,3 +72,30 @@ export const deleteCharacter = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+
+export const editCharacter = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, personality, firstGreet, information } = req.body;
+
+    if (!id) {
+      return res.status(400).json({ message: "Missing character id" });
+    }
+
+    const character = await Character.findByIdAndUpdate(
+      id,
+      { name, personality, firstGreet, information },
+      { new: true }
+    );
+
+    if (!character) {
+      return res.status(404).json({ message: "Not found character" });
+    }
+    return res.status(200).json({
+      status: "success",
+      character,
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
