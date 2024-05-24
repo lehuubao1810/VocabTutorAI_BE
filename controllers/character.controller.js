@@ -1,4 +1,6 @@
 import Character from "../models/character.model.js";
+import multer from 'multer';
+import path from 'path';
 
 export const createCharacter = async (req, res) => {
   try {
@@ -73,24 +75,53 @@ export const deleteCharacter = async (req, res) => {
   }
 };
 
+// Thiết lập multer để lưu trữ tệp hình ảnh
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/'); // Thư mục lưu trữ hình ảnh
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  },
+});
+
+const upload = multer({ storage });
+
+// Đảm bảo thư mục uploads tồn tại
+import fs from 'fs';
+const dir = '../uploads';
+if (!fs.existsSync(dir)){
+    fs.mkdirSync(dir);
+}
+
 export const editCharacter = async (req, res) => {
   try {
     const { id } = req.params;
     const { name, personality, firstGreet, information } = req.body;
+    let imagePath;
 
     if (!id) {
       return res.status(400).json({ message: "Missing character id" });
     }
 
-    const character = await Character.findByIdAndUpdate(
-      id,
-      { name, personality, firstGreet, information },
-      { new: true }
-    );
+    if (req.file) {
+      imagePath = req.file.path;
+    }
+
+    const updateData = {
+      name,
+      personality,
+      firstGreet,
+      information,
+      ...(imagePath && { image: imagePath }), // Thêm trường image nếu có tệp hình ảnh
+    };
+
+    const character = await Character.findByIdAndUpdate(id, updateData, { new: true });
 
     if (!character) {
       return res.status(404).json({ message: "Not found character" });
     }
+
     return res.status(200).json({
       status: "success",
       character,
@@ -99,3 +130,6 @@ export const editCharacter = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+
+// Sử dụng middleware upload để xử lý yêu cầu có tệp hình ảnh
+export const uploadImageMiddleware = upload.single('image');  
