@@ -1,6 +1,5 @@
 import Character from "../models/character.model.js";
-import multer from 'multer';
-import path from 'path';
+import Conversation from "../models/conversation.model.js";
 
 export const createCharacter = async (req, res) => {
   try {
@@ -66,6 +65,12 @@ export const deleteCharacter = async (req, res) => {
 
     const character = await Character.findByIdAndDelete(id);
 
+    // delete conversation have character id
+    const deleteConversation = await Conversation.deleteMany({ character: id });
+    if (!deleteConversation) {
+      return res.status(404).json({ message: "Not found conversation" });
+    }
+
     if (!character) {
       return res.status(404).json({ message: "Not found character" });
     }
@@ -75,51 +80,24 @@ export const deleteCharacter = async (req, res) => {
   }
 };
 
-// Thiết lập multer để lưu trữ tệp hình ảnh
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/'); // Thư mục lưu trữ hình ảnh
-  },
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`);
-  },
-});
-
-const upload = multer({ storage });
-
-// Đảm bảo thư mục uploads tồn tại
-import fs from 'fs';
-const dir = '../uploads';
-if (!fs.existsSync(dir)){
-    fs.mkdirSync(dir);
-}
-
-export const uploadImageMiddleware = upload.single('image');
-
 export const editCharacter = async (req, res) => {
   try {
     const { id } = req.params;
     console.log(id);
     const { name, personality } = req.body;
-    let imagePath;
 
     if (!id) {
       return res.status(400).json({ message: "Missing character id" });
     }
 
-    if (req.file) {
-      imagePath = req.file.path;
-    }
-
-    const normalizedImagePath = imagePath.replace(/\\/g, '/');
-
     const updateData = {
       ...(name && { name }),
       ...(personality && { personality }),
-      ...(imagePath && { image: normalizedImagePath }),
     };
 
-    const character = await Character.findByIdAndUpdate(id, updateData, { new: true });
+    const character = await Character.findByIdAndUpdate(id, updateData, {
+      new: true,
+    });
 
     if (!character) {
       return res.status(404).json({ message: "Character not found" });
