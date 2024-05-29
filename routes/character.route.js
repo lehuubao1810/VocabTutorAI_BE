@@ -1,5 +1,5 @@
 import express from 'express';
-import { createCharacter, deleteCharacter, getCharacters, editCharacter, uploadImageMiddleware } from '../controllers/character.controller.js';
+import { createCharacter, deleteCharacter, getCharacters, editCharacter } from '../controllers/character.controller.js';
 
 
 const routerCharacter = express.Router();
@@ -10,6 +10,6 @@ routerCharacter.get('/getCharacters', getCharacters);
 
 routerCharacter.delete('/deleteCharacter/:id', deleteCharacter);
 
-routerCharacter.put('/editCharacter/:id', uploadImageMiddleware, editCharacter);
+routerCharacter.put('/editCharacter/:id', editCharacter);
 
 export default routerCharacter;
