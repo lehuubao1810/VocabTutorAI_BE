@@ -85,19 +85,29 @@ export const editCharacter = async (req, res) => {
     const { id } = req.params;
     console.log(id);
     const { name, personality } = req.body;
+    console.log(
+      "🚀 ~ file: character.controller.js ~ line 107 ~ editCharacter ~ name",
+      name
+    );
+    console.log(
+      "🚀 ~ file: character.controller.js ~ line 107 ~ editCharacter ~ personality",
+      personality
+    );
 
     if (!id) {
       return res.status(400).json({ message: "Missing character id" });
     }
 
-    const updateData = {
-      ...(name && { name }),
-      ...(personality && { personality }),
-    };
-
-    const character = await Character.findByIdAndUpdate(id, updateData, {
-      new: true,
-    });
+    const character = await Character.findByIdAndUpdate(
+      id,
+      {
+        name,
+        personality,
+      },
+      {
+        new: true,
+      }
+    );
 
     if (!character) {
       return res.status(404).json({ message: "Character not found" });
